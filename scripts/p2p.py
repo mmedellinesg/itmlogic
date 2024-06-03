@@ -393,10 +393,22 @@ def compute_p2p(transmitter, receiver, dem_path, directory_shapes, RESULTS, old_
 
     #Check (out of interest) how many measurements are in each profile
     print('len(measured_terrain_profile) {}'.format(len(measured_terrain_profile)))
-    print('len(original_surface_profile_m) {}'.format(len(original_surface_profile_m)))
+
+    #DEFINE MAIN USER PARAMETERS
+    #Define an empty dict for user defined parameters
+    main_user_defined_parameters = {}
+
+    #Define antenna heights - Antenna 1 height (m) # Antenna 2 height (m)
+    main_user_defined_parameters['hg'] = [143.9, 8.5]
+
+    #Polarization selection (0=horizontal, 1=vertical)
+    main_user_defined_parameters['ipol'] = 0
+
+    main_user_defined_parameters['d'] = distance_km
+    main_user_defined_parameters['fmhz'] = transmitter['properties']['fmhz']
 
     #Run model and get output
-    output = itmlogic_p2p(main_user_defined_parameters, original_surface_profile_m)
+    output = itmlogic_p2p(main_user_defined_parameters, measured_terrain_profile)
 
     #Grab coordinates for transmitter and receiver for writing to .csv
     transmitter_x = transmitter['geometry']['coordinates'][0]
@@ -443,22 +455,5 @@ if __name__ == '__main__':
     #Set coordinate reference systems
     old_crs = 'EPSG:4326'
     # new_crs = 'EPSG:3857'
-
-    #DEFINE MAIN USER PARAMETERS
-    #Define an empty dict for user defined parameters
-    main_user_defined_parameters = {}
-
-    #Define radio operating frequency (MHz)
-    # main_user_defined_parameters['fmhz'] = 573.3
-    main_user_defined_parameters['fmhz']  =  41.5
-
-    #Define distance between terminals in km (from Longley Rice docs)
-    main_user_defined_parameters['d'] = 77.8
-
-    #Define antenna heights - Antenna 1 height (m) # Antenna 2 height (m)
-    main_user_defined_parameters['hg'] = [143.9, 8.5]
-
-    #Polarization selection (0=horizontal, 1=vertical)
-    main_user_defined_parameters['ipol'] = 0
 
     compute_p2p(transmitter, receiver, dem_folder, directory_shapes, RESULTS, old_crs)
