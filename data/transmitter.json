@@ -1,0 +1,10 @@
+{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [-0.07491679518573545, 51.42413477117786]
+        }, 
+    "properties": {
+        "id": "Crystal Palace radio transmitter"
+        }
+}

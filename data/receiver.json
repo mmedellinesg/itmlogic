@@ -1,0 +1,10 @@
+{
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-0.8119433954872186, 51.94972494521946]
+        },
+        "properties": {
+            "id": "Mursley"
+        }
+    }

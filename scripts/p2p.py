@@ -26,6 +26,8 @@ from itmlogic.misc.qerfi import qerfi
 from itmlogic.preparatory_subroutines.qlrpfl import qlrpfl
 from itmlogic.statistics.avar import avar
 from terrain_module import terrain_p2p
+import argparse
+import json
 
 # #set up file paths
 CONFIG = configparser.ConfigParser()
@@ -341,33 +343,33 @@ def straight_line_from_points(a, b):
     return line
 
 
-if __name__ == '__main__':
 
-    #Setup data folder paths
-    dem_folder = os.path.join(BASE_PATH)
-    directory_shapes = os.path.join(DATA_PROCESSED, 'shapes')
 
-    #Set coordinate reference systems
-    old_crs = 'EPSG:4326'
-    # new_crs = 'EPSG:3857'
-
-    #DEFINE MAIN USER PARAMETERS
-    #Define an empty dict for user defined parameters
-    main_user_defined_parameters = {}
-
-    #Define radio operating frequency (MHz)
-    # main_user_defined_parameters['fmhz'] = 573.3
-    main_user_defined_parameters['fmhz']  =  41.5
-
-    #Define distance between terminals in km (from Longley Rice docs)
-    main_user_defined_parameters['d'] = 77.8
-
-    #Define antenna heights - Antenna 1 height (m) # Antenna 2 height (m)
-    main_user_defined_parameters['hg'] = [143.9, 8.5]
-
-    #Polarization selection (0=horizontal, 1=vertical)
-    main_user_defined_parameters['ipol'] = 0
-
+def compute_p2p(transmitter, receiver, dem_path, directory_shapes, RESULTS, old_crs = 'EPSG:4326'):
+    """
+    Computes and exports p2p results.
+    Inputs: transmitter and receiver geojson objects
+    transmitter = {
+        'type': 'Feature',
+        'geometry': {
+            'type': 'Point',
+            'coordinates': (-0.07491679518573545, 51.42413477117786)
+        },
+        'properties': {
+            'id': 'Crystal Palace radio transmitter'
+        }
+    }
+    receiver = {
+        'type': 'Feature',
+        'geometry': {
+            'type': 'Point',
+            'coordinates': (-0.8119433954872186, 51.94972494521946)
+        },
+        'properties': {
+            'id': 'Mursley'
+        }
+    }
+    """
     #Original surface profile from Longley Rice docs
     original_surface_profile_m = [
         96,  84,  65,  46,  46,  46,  61,  41,  33,  27,  23,  19,  15,  15,  15,
@@ -382,37 +384,11 @@ if __name__ == '__main__':
         94,  91, 105, 122, 122, 122, 122, 122, 137, 137, 137, 137, 137, 137, 137,
         137, 140, 144, 147, 150, 152, 159
     ]
-
-    #Create new geojson for Crystal Palace radio transmitter
-    transmitter = {
-        'type': 'Feature',
-        'geometry': {
-            'type': 'Point',
-            'coordinates': (-0.07491679518573545, 51.42413477117786)
-        },
-        'properties': {
-            'id': 'Crystal Palace radio transmitter'
-        }
-    }
-
-    #Create new geojson for Mursley
-    receiver = {
-        'type': 'Feature',
-        'geometry': {
-            'type': 'Point',
-            'coordinates': (-0.8119433954872186, 51.94972494521946)
-        },
-        'properties': {
-            'id': 'Mursley'
-        }
-    }
-
     #Create new geojson for terrain path
     line = straight_line_from_points(transmitter, receiver)
 
     #Run terrain module
-    measured_terrain_profile, distance_km, points = terrain_p2p(
-        os.path.join(dem_folder, 'ASTGTM2_N51W001_dem.tif'), line)
+    measured_terrain_profile, distance_km, points = terrain_p2p(dem_path, line)
     print('Distance is {}km'.format(distance_km))
 
     #Check (out of interest) how many measurements are in each profile
@@ -439,6 +415,50 @@ if __name__ == '__main__':
     write_shapefile(points, directory_shapes, 'points.shp', old_crs)
 
     #Write results to .csv
-    csv_writer(output, RESULTS, 'p2p_results.csv')
+    csv_writer(output, RESULTS, 'p2p_t_'+transmitter['properties']['id']+'_r_'+receiver['properties']['id']+'.csv')
 
     print('Completed run')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Point to Point prediction mode runner.')
+    parser.add_argument('--transmit', required=True, type=str, help='Path to transmitter JSON file')
+    parser.add_argument('--receiver', required=True, type=str, help='Path to receiver JSON file')
+    parser.add_argument('--dem', type=str, help='Path to DEM file', default='data/ASTGTM2_N51W001_dem.tif')
+    parser.add_argument('--results', type=str, help='Path to results folder', default='results')
+    parser.add_argument('--shapes', type=str, help='Path to shapes folder', default='data/processed/shapes')
+    args = parser.parse_args()
+
+    transmitter_path = args.transmit
+    receiver_path = args.receiver
+    dem_folder = args.dem
+    RESULTS = args.results
+    directory_shapes = args.shapes
+
+    with open(transmitter_path, 'r') as j:
+        transmitter = json.loads(j.read())
+    with open(receiver_path, 'r') as j:
+        receiver = json.loads(j.read())
+
+    #Set coordinate reference systems
+    old_crs = 'EPSG:4326'
+    # new_crs = 'EPSG:3857'
+
+    #DEFINE MAIN USER PARAMETERS
+    #Define an empty dict for user defined parameters
+    main_user_defined_parameters = {}
+
+    #Define radio operating frequency (MHz)
+    # main_user_defined_parameters['fmhz'] = 573.3
+    main_user_defined_parameters['fmhz']  =  41.5
+
+    #Define distance between terminals in km (from Longley Rice docs)
+    main_user_defined_parameters['d'] = 77.8
+
+    #Define antenna heights - Antenna 1 height (m) # Antenna 2 height (m)
+    main_user_defined_parameters['hg'] = [143.9, 8.5]
+
+    #Polarization selection (0=horizontal, 1=vertical)
+    main_user_defined_parameters['ipol'] = 0
+
+    compute_p2p(transmitter, receiver, dem_folder, directory_shapes, RESULTS, old_crs)
