@@ -226,6 +226,7 @@ def itmlogic_p2p(main_user_defined_parameters, surface_profile_m):
                 'distance_km': prop['d'],
                 'reliability_level_%': qr[jr],
                 'confidence_level_%': qc[jc],
+                'free_space_loss_dB': fs,
                 'propagation_loss_dB': fs + avar1 #Add free space loss and correction
                 })
 
