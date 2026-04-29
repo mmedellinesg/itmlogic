@@ -1,10 +1,10 @@
 language: python
 python:
-- "3.7"
+- "3.14"
 
 install:
   - pip install 'pytest>=4.6' pytest-cov coveralls
-  - python setup.py develop
+  - python -m pip install -e .
   - pip freeze
 
 before_script:

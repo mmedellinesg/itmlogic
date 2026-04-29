@@ -6,19 +6,10 @@ Written by Ed Oughton and Tom Russell
 June 2019
 
 """
-import glob
-import math
-import os
-import sys
-from collections import OrderedDict
-from functools import partial, lru_cache
-
-import fiona
 import pyproj
-import rasterio
 import numpy as np
-from fiona.crs import from_epsg
-from rasterstats import gen_zonal_stats, point_query
+import rasterio
+from rasterio.mask import mask
 from shapely.ops import transform
 from shapely.geometry import Point, LineString, mapping
 
@@ -49,19 +40,9 @@ def terrain_area(dem, lon, lat, cell_range):
     # Buffer around cell point
     cell_area = geodesic_point_buffer(lon, lat, cell_range)
 
-    # Calculate raster stats
-    stats = next(gen_zonal_stats(
-        [cell_area],
-        dem,
-        add_stats={
-            'interdecile_range': interdecile_range
-        },
-        nodata=-9999
-    ))
+    values = _polygon_values(dem, cell_area)
 
-    id_range = stats['interdecile_range']
-
-    return id_range
+    return interdecile_range(values)
 
 
 def geodesic_point_buffer(lon, lat, distance_m):
@@ -128,6 +109,31 @@ def all_data(x):
     return data[data > 0]
 
 
+def _polygon_values(dem, polygon):
+    """
+    Read positive raster values within a polygon.
+    """
+    with rasterio.open(dem) as dataset:
+        data, _ = mask(dataset, [mapping(polygon)], crop=True, filled=False)
+
+    return all_data(data[0])
+
+
+def _sample_points(dem, points):
+    """
+    Sample raster values at point coordinates.
+    """
+    coordinates = [(point.x, point.y) for point in points]
+
+    with rasterio.open(dem) as dataset:
+        sampled = [
+            float(value[0]) if value[0] is not None else np.nan
+            for value in dataset.sample(coordinates)
+        ]
+
+    return sampled
+
+
 def terrain_p2p(dem, line):
     """
     This module takes a set of point coordinates and returns
@@ -165,7 +171,7 @@ def terrain_p2p(dem, line):
     point_geoms = [line_geom.interpolate(currentdistance) for currentdistance in steps]
 
     # Sample elevation profile
-    surface_profile = point_query(point_geoms, dem)
+    surface_profile = _sample_points(dem, point_geoms)
 
     # Put together point features with raster values
     points = [

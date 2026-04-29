@@ -13,19 +13,12 @@ import os
 import csv
 import math
 import numpy as np
-from functools import partial
-from collections import OrderedDict
-
-import fiona
-from fiona.crs import from_epsg
-from pyproj import Transformer
-from shapely.geometry import LineString, mapping
-from shapely.ops import transform
 
 from itmlogic.misc.qerfi import qerfi
 from itmlogic.preparatory_subroutines.qlrpfl import qlrpfl
 from itmlogic.statistics.avar import avar
 from terrain_module import terrain_p2p
+from vector_io import write_shapefile
 import argparse
 import json
 
@@ -259,49 +252,6 @@ def csv_writer(data, directory, filename):
         writer = csv.DictWriter(csv_file, fieldnames, lineterminator = '\n')
         writer.writeheader()
         writer.writerows(data)
-
-
-def write_shapefile(data, directory, filename, crs):
-    """
-    Write geojson data to shapefile.
-
-    Parameters
-    ----------
-    data : list of dicts
-        Data to be written.
-    directory : string
-        Folder to write the results to.
-    filename : string
-        Name of the file to write.
-    crs : string
-        Defines the coordinate reference system.
-
-    """
-    prop_schema = []
-    for name, value in data[0]['properties'].items():
-        fiona_prop_type = next((
-            fiona_type for fiona_type, python_type in \
-                fiona.FIELD_TYPES_MAP.items() if \
-                python_type == type(value)), None
-            )
-
-        prop_schema.append((name, fiona_prop_type))
-
-    sink_driver = 'ESRI Shapefile'
-    sink_crs = {'init': crs}
-    sink_schema = {
-        'geometry': data[0]['geometry']['type'],
-        'properties': OrderedDict(prop_schema)
-    }
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    with fiona.open(
-        os.path.join(directory, filename), 'w',
-        driver=sink_driver, crs=sink_crs, schema=sink_schema) as sink:
-        for datum in data:
-            sink.write(datum)
 
 
 def straight_line_from_points(a, b):

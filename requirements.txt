@@ -1,9 +1,8 @@
 numpy
 shapely
-fiona
+pyshp
 rasterio
 pyproj
 tqdm
 pytest >= 4.6
-rasterstats
 simplejson

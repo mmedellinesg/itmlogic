@@ -1,3 +1,4 @@
+#%%
 import pytest
 from itmlogic.diffraction_attenuation.adiff import adiff
 
@@ -28,3 +29,5 @@ def test_adiff(
     assert actual_answer['qk'] == expected_answer['qk']
     assert actual_answer['aht'] == expected_answer['aht']
     assert actual_answer['xht'] == expected_answer['xht']
+
+# %%

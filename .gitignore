@@ -13,6 +13,7 @@ __pycache__/*
 
 # Virtualenv (if used)
 venv
+.venv/
 
 # Project files
 .ropeproject

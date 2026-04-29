@@ -51,7 +51,7 @@ this model.
 Setup and configuration
 =======================
 
-All code for ``itmlogic`` is written in Python (Python>=3.7).
+All code for ``itmlogic`` is written in Python (Python>=3.9, including Python 3.14).
 
 See requirements.txt for a full list of dependencies.
 
@@ -65,19 +65,19 @@ and packages.
 
 Create a conda environment called ``itmlogic`` type::
 
-    conda create --name itmlogic python=3.7 gdal
+    conda create --name itmlogic python=3.14
 
 Activate it (run this each time you switch projects)::
 
     conda activate itmlogic
 
-Install any optional packages::
+Install the project dependencies::
 
-    conda install numpy fiona shapely rtree rasterio pyproj tqdm pytest
+    python -m pip install -r requirements.txt
 
 For development purposes, clone this repository and run::
 
-    python setup.py develop
+    python -m pip install -e .
 
 Run the tests::
 

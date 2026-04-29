@@ -39,7 +39,7 @@ Terrain profile slice: Crystal Palace (South London) to Mursley
 
 ## Setup and configuration
 
-All code for ``itmlogic`` is written in Python (Python>=3.7).
+All code for ``itmlogic`` is written in Python (Python>=3.9, including Python 3.14).
 
 See requirements.txt for a full list of dependencies.
 
@@ -52,23 +52,19 @@ and packages.
 
 Create a conda environment called ``itmlogic``:
 
-    conda create --name itmlogic python=3.7 gdal
+    conda create --name itmlogic python=3.14
 
 Activate it (run this each time you switch projects):
 
     conda activate itmlogic
 
-First, install optional packages:
+Install the project dependencies:
 
-    conda install numpy fiona shapely rtree rasterio pyproj tqdm pytest rasterstats pandas matplotlib
+    python -m pip install -r requirements.txt
 
-Once in the new environment, to install ``itmlogic`` clone this repository and either run:
+Once in the new environment, to install ``itmlogic`` clone this repository and run:
 
-    python setup.py install
-
-Or:
-
-    python setup.py develop
+    python -m pip install -e .
 
 You can first run the tests to make sure everything is working correctly:
 

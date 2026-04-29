@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-"""Setup itmlogic package
-"""
+"""Setup itmlogic package."""
 from glob import glob
 from os.path import basename, splitext
+from pathlib import Path
 
 from setuptools import find_packages
 from setuptools import setup
 
 
 def readme():
-    """Read README contents
-    """
-    with open('README.md') as f:
-        return f.read()
+    """Read README contents."""
+    return Path('README.md').read_text(encoding='utf-8')
 
 
 setup(
@@ -30,14 +27,20 @@ setup(
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     include_package_data=True,
+    python_requires='>=3.9',
     zip_safe=False,
     classifiers=[
-        # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 1 - Planning',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
         'Topic :: Scientific/Engineering :: GIS',
         'Topic :: Utilities',
     ],
@@ -48,7 +51,6 @@ setup(
         'setuptools_scm'
     ],
     install_requires=[
-        # eg: 'aspectlib==1.1.1', 'six>=1.7',
         'numpy',
     ],
     entry_points={
